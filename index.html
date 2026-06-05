@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>我的每日清单</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&family=Lora:ital,wght@0,400;0,500;1,400&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F0E8;
+    --bg2: #EDE7D9;
+    --bg3: #E4DDD0;
+    --card: #FAF7F2;
+    --accent: #A0855B;
+    --accent2: #C9A87C;
+    --accent3: #7A6148;
+    --text: #3D2F22;
+    --text2: #7A6148;
+    --text3: #A08870;
+    --check: #6B8F6E;
+    --check-bg: #EAF2EA;
+    --border: rgba(160,133,91,0.18);
+    --shadow: rgba(100,70,30,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+    padding-bottom: 40px;
+  }
+
+  /* ── 顶部名言区 ── */
+  .quote-hero {
+    position: relative;
+    background: linear-gradient(160deg, #C9A87C 0%, #A0855B 40%, #7A6148 100%);
+    padding: 44px 28px 36px;
+    overflow: hidden;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .quote-hero::before {
+    content: '';
+    position: absolute; top: -30px; right: -30px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.07);
+  }
+  .quote-hero::after {
+    content: '';
+    position: absolute; bottom: -20px; left: -20px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+
+  .quote-date {
+    font-family: 'Lora', serif;
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    letter-spacing: 0.12em;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+
+  .quote-mark {
+    font-family: 'Lora', serif;
+    font-size: 52px;
+    line-height: 1;
+    color: rgba(255,255,255,0.2);
+    margin-bottom: -8px;
+    font-style: italic;
+  }
+
+  .quote-zh {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 17px;
+    font-weight: 500;
+    color: #fff;
+    line-height: 1.7;
+    margin-bottom: 10px;
+    position: relative; z-index: 1;
+  }
+
+  .quote-en {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.72);
+    line-height: 1.6;
+    margin-bottom: 14px;
+    position: relative; z-index: 1;
+  }
+
+  .quote-author {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.08em;
+    position: relative; z-index: 1;
+  }
+
+  .quote-nav {
+    position: absolute; top: 18px; right: 20px;
+    display: flex; gap: 8px; z-index: 2;
+  }
+
+  .quote-btn {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.8);
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .quote-btn:active { background: rgba(255,255,255,0.25); }
+
+  /* ── 进度条 ── */
+  .progress-bar-wrap {
+    background: var(--bg2);
+    padding: 14px 20px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .progress-top {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
+  }
+  .progress-label { font-size: 12px; color: var(--text3); }
+  .progress-count { font-size: 12px; font-weight: 500; color: var(--accent); }
+  .progress-track {
+    height: 5px; background: var(--bg3); border-radius: 99px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    transition: width 0.4s ease;
+  }
+
+  /* ── 时间段分组 ── */
+  .section { margin: 16px 14px 0; }
+
+  .section-header {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 8px; padding: 0 4px;
+  }
+  .section-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .section-name {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
+    color: var(--text3); text-transform: uppercase;
+  }
+
+  /* ── 每条任务 ── */
+  .task-card {
+    background: var(--card);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    margin-bottom: 7px;
+    display: flex;
+    align-items: flex-start;
+    padding: 12px 14px;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.15s, opacity 0.15s;
+    user-select: none;
+  }
+  .task-card:active { background: var(--bg2); }
+  .task-card.done { opacity: 0.55; }
+
+  .task-check {
+    width: 22px; height: 22px; flex-shrink: 0;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    margin-top: 1px;
+  }
+  .task-card.done .task-check {
+    background: var(--check-bg);
+    border-color: var(--check);
+  }
+  .task-check svg { display: none; }
+  .task-card.done .task-check svg { display: block; }
+
+  .task-body { flex: 1; }
+  .task-time { font-size: 11px; color: var(--text3); margin-bottom: 2px; }
+  .task-label {
+    font-size: 14.5px; color: var(--text); line-height: 1.5;
+    font-weight: 400;
+  }
+  .task-card.done .task-label {
+    text-decoration: line-through;
+    color: var(--text3);
+  }
+  .task-note { font-size: 11.5px; color: var(--text3); margin-top: 3px; line-height: 1.5; }
+
+  .task-tag {
+    display: inline-block; font-size: 10px; padding: 2px 7px;
+    border-radius: 20px; margin-left: 5px; vertical-align: middle;
+    line-height: 1.4;
+  }
+  .tag-health { background: #E8F2E8; color: #4A7A4D; }
+  .tag-learn  { background: #EAE6F8; color: #5B4B99; }
+  .tag-beauty { background: #F8EAF0; color: #8F4A6E; }
+  .tag-eat    { background: #F8F0E4; color: #8A6030; }
+  .tag-family { background: #EAF0F8; color: #3A608A; }
+
+  /* ── 原则区 ── */
+  .principles {
+    margin: 16px 14px 0;
+    background: var(--card);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 16px;
+  }
+  .principles-title {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
+    color: var(--text3); text-transform: uppercase; margin-bottom: 12px;
+  }
+  .pill-wrap { display: flex; flex-wrap: wrap; gap: 7px; }
+  .pill {
+    font-size: 12px; padding: 4px 12px;
+    border-radius: 99px;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    background: var(--bg2);
+  }
+
+  /* ── 今日总结 ── */
+  .summary-wrap {
+    margin: 16px 14px 0;
+  }
+  .summary-label {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
+    color: var(--text3); text-transform: uppercase;
+    margin-bottom: 8px; padding-left: 4px;
+  }
+  .summary-box {
+    width: 100%;
+    min-height: 100px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    resize: none;
+    outline: none;
+    line-height: 1.7;
+  }
+  .summary-box::placeholder { color: var(--text3); }
+  .summary-box:focus { border-color: var(--accent2); }
+
+  /* ── 重置按钮 ── */
+  .reset-row {
+    display: flex; justify-content: center; margin: 20px 14px 0;
+  }
+  .reset-btn {
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 12px; color: var(--text3);
+    background: none; border: 1px dashed var(--border);
+    border-radius: 99px; padding: 7px 20px; cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .reset-btn:active { color: var(--accent); border-color: var(--accent2); }
+
+  /* ── 底部签名 ── */
+  .footer {
+    text-align: center; margin-top: 28px; padding-bottom: 10px;
+    font-size: 11px; color: var(--text3); letter-spacing: 0.05em;
+  }
+</style>
+</head>
+<body>
+
+<!-- 名言区 -->
+<div class="quote-hero">
+  <div class="quote-nav">
+    <div class="quote-btn" onclick="prevQuote()">‹</div>
+    <div class="quote-btn" onclick="nextQuote()">›</div>
+  </div>
+  <div class="quote-date" id="todayDate"></div>
+  <div class="quote-mark">"</div>
+  <div class="quote-zh" id="qZh"></div>
+  <div class="quote-en" id="qEn"></div>
+  <div class="quote-author" id="qAuthor"></div>
+</div>
+
+<!-- 进度 -->
+<div class="progress-bar-wrap">
+  <div class="progress-top">
+    <span class="progress-label">今日完成进度</span>
+    <span class="progress-count" id="progressText">0 / 0</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+</div>
+
+<div id="taskList"></div>
+
+<!-- 每日原则 -->
+<div class="principles">
+  <div class="principles-title">每日核心原则</div>
+  <div class="pill-wrap">
+    <span class="pill">管住嘴，不乱吃</span>
+    <span class="pill">禁冷冻食品</span>
+    <span class="pill">每天听英语</span>
+    <span class="pill">读书非小说</span>
+    <span class="pill">定期护肤</span>
+    <span class="pill">喝白茶/姜茶</span>
+    <span class="pill">22:30前入睡</span>
+    <span class="pill">健康第一</span>
+  </div>
+</div>
+
+<!-- 今日总结 -->
+<div class="summary-wrap">
+  <div class="summary-label">今日总结</div>
+  <textarea class="summary-box" id="summaryBox" placeholder="记录今天的感受、收获或明日计划…" rows="4"></textarea>
+</div>
+
+<div class="reset-row">
+  <button class="reset-btn" onclick="confirmReset()">🔄 重置今日打卡</button>
+</div>
+
+<div class="footer">愿每一天都有小小进步 ✦</div>
+
+<script>
+const QUOTES = [
+  { zh:"成功是一系列小努力的总和，坚持每一天。", en:"Success is the sum of small efforts, repeated day in and day out.", author:"— 罗伯特·科利尔 Robert Collier" },
+  { zh:"你现在拥有的，曾经是你梦寐以求的。", en:"What you have now is what you once prayed for.", author:"— 塔木德 Talmud" },
+  { zh:"不要等待机会，创造机会。", en:"Don't wait for opportunity. Create it.", author:"— 乔治·萧伯纳 George Bernard Shaw" },
+  { zh:"健康不是一切，但没有健康就没有一切。", en:"Health is not everything, but without health, everything is nothing.", author:"— 叔本华 Schopenhauer" },
+  { zh:"每一个不曾起舞的日子，都是对生命的辜负。", en:"Every day that passes without dancing is a wasted day.", author:"— 尼采 Nietzsche" },
+  { zh:"自律给我自由。", en:"Discipline gives me freedom.", author:"— 约各布·威林克 Jocko Willink" },
+  { zh:"先相信自己，然后别人才会相信你。", en:"Believe in yourself first, then others will believe in you.", author:"— 罗曼·罗兰 Romain Rolland" },
+  { zh:"你的身体是你灵魂的神殿，好好照顾它。", en:"Your body is the temple of your soul. Take care of it.", author:"— 保拉·科艾略 Paulo Coelho" },
+  { zh:"种一棵树最好的时间是十年前，其次是现在。", en:"The best time to plant a tree was 10 years ago. The second best time is now.", author:"— 中国谚语 Chinese Proverb" },
+  { zh:"生活不是等待风暴过去，而是学会在雨中起舞。", en:"Life is not about waiting for the storm to pass, but learning to dance in the rain.", author:"— 薇薇安·格林 Vivian Greene" },
+];
+
+const SECTIONS = [
+  { name:"🌅 早晨", dot:"#E8A84A", tasks:[
+    { time:"07:00", label:"起床", note:"开车路上听英语口语 / TED演讲", tag:"learn" },
+    { time:"07:30", label:"吃早饭 + 喝白茶/姜茶", note:"忌冷冻食品，管住嘴", tag:"eat" },
+    { time:"08:00", label:"化妆", tag:"beauty" },
+    { time:"08:30", label:"出门", note:"车上听英语 / TED / 外刊，不停下来", tag:"learn" },
+  ]},
+  { name:"💼 上午", dot:"#5B8AC9", tasks:[
+    { time:"09:00", label:"到公司" },
+    { time:"09:05", label:"练八段锦（约20分钟）", tag:"health" },
+    { time:"09:30", label:"晨会 / 带班安排工作" },
+    { time:"09:30–11:00", label:"正常工作，间隙看书/学习", note:"不看小说", tag:"learn" },
+  ]},
+  { name:"🥗 午间", dot:"#5A9A70", tasks:[
+    { time:"11:00", label:"腹部训练（15–20分钟）", tag:"health" },
+    { time:"12:00", label:"吃午饭（15分钟内吃完）", note:"不吃冷冻食品", tag:"eat" },
+    { time:"12:15", label:"饭后散步10分钟", tag:"health" },
+    { time:"12:25", label:"手臂训练（约15分钟）", tag:"health" },
+    { time:"12:40", label:"午休" },
+  ]},
+  { name:"🌤 下午", dot:"#9A7ACB", tasks:[
+    { time:"小夜", label:"正常工作 + 学习/读书", note:"听外刊，听演讲，不看小说", tag:"learn" },
+    { time:"16:30", label:"吃一个小苹果", tag:"eat" },
+  ]},
+  { name:"🌙 晚上", dot:"#C87AAA", tasks:[
+    { time:"18:30", label:"下班回家", note:"路上继续听英语", tag:"learn" },
+    { time:"19:00+", label:"吃晚饭（少吃，以米饭为主）", note:"绝不吃冷冻食品", tag:"eat" },
+    { time:"饭后", label:"陪娃写作业", tag:"family" },
+    { time:"20:00", label:"带娃户外运动（排腿拉直等）", tag:"health" },
+  ]},
+  { name:"🌛 睡前", dot:"#C08070", tasks:[
+    { time:"21:00", label:"洗漱（约10分钟）" },
+    { time:"洗后", label:"护肤 / 热敷 / 敷面膜（定期）", tag:"beauty" },
+    { time:"22:30", label:"放下手机，上床睡觉 📵", note:"不看手机，8.5小时睡眠目标" },
+  ]},
+];
+
+const TAG_MAP = { health:"健康", learn:"学习", beauty:"美容", eat:"饮食", family:"家庭" };
+
+let todayKey = '';
+let state = {};
+let quoteIdx = 0;
+
+function getDateKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+
+function loadState() {
+  todayKey = getDateKey();
+  try {
+    const saved = localStorage.getItem('tracker_' + todayKey);
+    state = saved ? JSON.parse(saved) : { checks: {}, summary: '', quoteIdx: Math.floor(Math.random()*QUOTES.length) };
+    quoteIdx = state.quoteIdx || 0;
+  } catch(e) { state = { checks:{}, summary:'', quoteIdx:0 }; }
+}
+
+function saveState() {
+  state.quoteIdx = quoteIdx;
+  try { localStorage.setItem('tracker_' + todayKey, JSON.stringify(state)); } catch(e){}
+}
+
+function renderDate() {
+  const d = new Date();
+  const wd = ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+  document.getElementById('todayDate').textContent =
+    `${d.getFullYear()} · ${d.getMonth()+1}月${d.getDate()}日 ${wd}`;
+}
+
+function renderQuote() {
+  const q = QUOTES[quoteIdx % QUOTES.length];
+  document.getElementById('qZh').textContent = q.zh;
+  document.getElementById('qEn').textContent = q.en;
+  document.getElementById('qAuthor').textContent = q.author;
+}
+
+function nextQuote() { quoteIdx = (quoteIdx+1) % QUOTES.length; renderQuote(); saveState(); }
+function prevQuote() { quoteIdx = (quoteIdx-1+QUOTES.length) % QUOTES.length; renderQuote(); saveState(); }
+
+function renderTasks() {
+  let total=0, done=0;
+  const container = document.getElementById('taskList');
+  container.innerHTML = '';
+
+  SECTIONS.forEach((sec, si) => {
+    const div = document.createElement('div');
+    div.className = 'section';
+
+    const hdr = document.createElement('div');
+    hdr.className = 'section-header';
+    hdr.innerHTML = `<div class="section-dot" style="background:${sec.dot}"></div><span class="section-name">${sec.name}</span>`;
+    div.appendChild(hdr);
+
+    sec.tasks.forEach((task, ti) => {
+      total++;
+      const id = `${si}_${ti}`;
+      const isDone = !!state.checks[id];
+      if (isDone) done++;
+
+      const card = document.createElement('div');
+      card.className = 'task-card' + (isDone ? ' done' : '');
+      card.onclick = () => toggleTask(id, card, si, ti);
+
+      const tagHtml = task.tag
+        ? `<span class="task-tag tag-${task.tag}">${TAG_MAP[task.tag]}</span>` : '';
+      const noteHtml = task.note
+        ? `<div class="task-note">${task.note}</div>` : '';
+
+      card.innerHTML = `
+        <div class="task-check">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <polyline points="1.5,6 4.5,9 10.5,3" stroke="#6B8F6E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="task-body">
+          <div class="task-time">${task.time || ''}</div>
+          <div class="task-label">${task.label}${tagHtml}</div>
+          ${noteHtml}
+        </div>`;
+      div.appendChild(card);
+    });
+
+    container.appendChild(div);
+  });
+
+  updateProgress(done, total);
+}
+
+function toggleTask(id, card, si, ti) {
+  state.checks[id] = !state.checks[id];
+  card.classList.toggle('done', state.checks[id]);
+  saveState();
+  updateProgressFromDOM();
+}
+
+function updateProgressFromDOM() {
+  let total=0, done=0;
+  SECTIONS.forEach((sec, si) => { sec.tasks.forEach((t,ti) => { total++; if(state.checks[`${si}_${ti}`]) done++; }); });
+  updateProgress(done, total);
+}
+
+function updateProgress(done, total) {
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('progressText').textContent = `${done} / ${total}`;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function confirmReset() {
+  if (confirm('确认重置今日所有打卡记录？')) {
+    state.checks = {};
+    saveState();
+    renderTasks();
+  }
+}
+
+function initSummary() {
+  const box = document.getElementById('summaryBox');
+  box.value = state.summary || '';
+  box.addEventListener('input', () => { state.summary = box.value; saveState(); });
+}
+
+loadState();
+renderDate();
+renderQuote();
+renderTasks();
+initSummary();
+</script>
+</body>
+</html>
