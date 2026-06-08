@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>日签 — 2026.06.05</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: #0a1a0f;
+  }
+
+  .card {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  /* ============================
+     场景背景
+  ============================ */
+  .scene {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  /* 天空 */
+  .sky {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,
+      #c8e6c9 0%, #a5d6a7 8%, #81c784 18%,
+      #66bb6a 30%, #4caf50 45%, #388e3c 60%,
+      #2e7d32 75%, #1b5e20 90%, #0d3b0f 100%
+    );
+  }
+
+  /* 太阳 */
+  .sun-glow {
+    position: absolute;
+    top: 6%;
+    left: 48%;
+    width: min(200px, 40vw);
+    height: min(200px, 40vw);
+    background: radial-gradient(circle,
+      rgba(255,248,225,0.9) 0%, rgba(255,236,179,0.6) 15%,
+      rgba(255,224,130,0.25) 35%, rgba(255,255,255,0) 70%
+    );
+    border-radius: 50%;
+    animation: sunPulse 6s ease-in-out infinite;
+    filter: blur(2px);
+  }
+
+  @keyframes sunPulse {
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50% { transform: scale(1.15); opacity: 1; }
+  }
+
+  /* 光线 */
+  .light-rays {
+    position: absolute;
+    top: 8%;
+    left: 42%;
+    width: min(300px, 70vw);
+    height: min(400px, 55vh);
+    background: conic-gradient(
+      from 200deg at 20% 5%,
+      rgba(255,248,225,0.12) 0deg, transparent 3deg,
+      rgba(255,248,225,0.10) 6deg, transparent 8deg,
+      rgba(255,248,225,0.15) 13deg, transparent 17deg,
+      rgba(255,248,225,0.08) 22deg, transparent 25deg,
+      rgba(255,248,225,0.12) 30deg
+    );
+    animation: rayShift 8s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes rayShift {
+    0%, 100% { opacity: 0.6; transform: rotate(-2deg); }
+    50% { opacity: 0.9; transform: rotate(2deg); }
+  }
+
+  /* 薄雾 */
+  .mist-layer, .mist-layer-2, .mist-fg {
+    position: absolute;
+    left: -20%;
+    width: 140%;
+    pointer-events: none;
+  }
+  .mist-layer {
+    bottom: 35%;
+    height: min(180px, 22vh);
+    background: radial-gradient(ellipse at center,
+      rgba(255,255,255,0.25) 0%, rgba(200,230,200,0.15) 30%,
+      rgba(255,255,255,0) 70%
+    );
+  }
+  .mist-layer-2 {
+    bottom: 28%;
+    height: min(140px, 18vh);
+    background: radial-gradient(ellipse at center,
+      rgba(255,255,255,0.20) 0%, rgba(180,220,180,0.10) 40%,
+      rgba(255,255,255,0) 75%
+    );
+    animation: mistFloat 12s ease-in-out infinite;
+  }
+  .mist-fg {
+    bottom: 12%;
+    height: min(100px, 14vh);
+    background: radial-gradient(ellipse at center,
+      rgba(255,255,255,0.15) 0%, rgba(200,230,200,0.08) 40%,
+      rgba(255,255,255,0) 75%
+    );
+    animation: mistFloat 10s ease-in-out infinite reverse;
+  }
+
+  @keyframes mistFloat {
+    0%, 100% { transform: translateX(-3%) translateY(0); opacity: 0.7; }
+    50% { transform: translateX(3%) translateY(-5px); opacity: 1; }
+  }
+
+  /* 远山 */
+  .far-mountains {
+    position: absolute;
+    bottom: 38%;
+    left: 0;
+    width: 100%;
+    height: min(200px, 26vh);
+  }
+  .far-mountains svg, .mid-hills svg, .trees-layer svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* 中景山丘 */
+  .mid-hills {
+    position: absolute;
+    bottom: 32%;
+    left: 0;
+    width: 100%;
+    height: min(150px, 20vh);
+  }
+
+  /* 雨林树木 */
+  .trees-layer {
+    position: absolute;
+    bottom: 14%;
+    left: 0;
+    width: 100%;
+    height: 50%;
+  }
+
+  /* 雨滴 */
+  .rain-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .raindrop {
+    position: absolute;
+    width: 2px;
+    height: 14px;
+    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 100%);
+    border-radius: 1px;
+    animation: rainFall linear infinite;
+  }
+  @keyframes rainFall {
+    0% { transform: translateY(-20px); opacity: 0; }
+    10% { opacity: 0.7; }
+    90% { opacity: 0.3; }
+    100% { transform: translateY(105vh); opacity: 0; }
+  }
+
+  /* 萤火虫 */
+  .firefly {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: #c8ff78;
+    border-radius: 50%;
+    box-shadow: 0 0 8px 3px rgba(200,255,120,0.7), 0 0 18px 5px rgba(200,255,120,0.3);
+    animation: fireflyFloat 5s ease-in-out infinite;
+  }
+  @keyframes fireflyFloat {
+    0%, 100% { transform: translate(0,0) scale(1); opacity: 0.2; }
+    25% { transform: translate(15px,-30px) scale(1.5); opacity: 0.9; }
+    50% { transform: translate(-10px,-60px) scale(0.8); opacity: 0.4; }
+    75% { transform: translate(-20px,-20px) scale(1.3); opacity: 0.7; }
+  }
+
+  /* ============================
+     日期 & 天气
+  ============================ */
+  .top-bar {
+    position: absolute;
+    top: env(safe-area-inset-top, 20px);
+    top: max(env(safe-area-inset-top), 20px);
+    left: 0;
+    width: 100%;
+    padding: 0 max(24px, 6vw);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    z-index: 10;
+  }
+  .date-block {
+    color: rgba(255,255,255,0.92);
+  }
+  .date-day {
+    font-size: clamp(36px, 8vw, 48px);
+    font-weight: 700;
+    line-height: 1;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .date-info {
+    font-size: clamp(13px, 3vw, 15px);
+    margin-top: 4px;
+    opacity: 0.85;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+  .special-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 3px 12px;
+    font-size: clamp(11px, 2.5vw, 13px);
+    margin-top: 6px;
+    border: 0.5px solid rgba(255,255,255,0.25);
+  }
+  .weather-block {
+    text-align: right;
+    color: rgba(255,255,255,0.92);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .weather-icon {
+    font-size: clamp(28px, 6vw, 36px);
+  }
+  .weather-temp {
+    font-size: clamp(20px, 4.5vw, 24px);
+    font-weight: 600;
+  }
+  .weather-desc {
+    font-size: clamp(12px, 2.8vw, 14px);
+    opacity: 0.8;
+  }
+
+  /* ============================
+     名言区
+  ============================ */
+  .quote-section {
+    position: absolute;
+    top: 48%;
+    left: 50%;
+    transform: translate(-50%, -52%);
+    z-index: 10;
+    text-align: center;
+    width: min(86%, 380px);
+    padding: 20px 16px;
+  }
+  .quote-mark {
+    font-size: clamp(44px, 10vw, 60px);
+    color: rgba(255,255,255,0.3);
+    line-height: 0.5;
+    font-family: Georgia, "Times New Roman", serif;
+  }
+  .quote-text {
+    font-size: clamp(18px, 4.5vw, 24px);
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.65;
+    letter-spacing: 0.04em;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.45);
+    margin: 10px 0;
+    white-space: pre-line;
+  }
+  .quote-divider {
+    width: 50px;
+    height: 2px;
+    background: rgba(255,255,255,0.35);
+    margin: 14px auto;
+    border-radius: 1px;
+  }
+  .quote-author {
+    font-size: clamp(14px, 3vw, 16px);
+    color: rgba(255,255,255,0.7);
+    text-shadow: 0 1px 6px rgba(0,0,0,0.35);
+    letter-spacing: 0.04em;
+  }
+
+  /* ============================
+     心情日记
+  ============================ */
+  .diary-section {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(180deg,
+      rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 20%, rgba(0,0,0,0.75) 100%
+    );
+    padding: clamp(20px, 4vh, 32px) max(20px, 5vw) max(24px, 4vh);
+    padding-bottom: calc(max(24px, 4vh) + env(safe-area-inset-bottom, 0px));
+    z-index: 10;
+  }
+  .diary-title {
+    font-size: clamp(12px, 2.6vw, 14px);
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 10px;
+    letter-spacing: 0.04em;
+  }
+  .mood-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .mood-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    background: rgba(255,255,255,0.10);
+    border: 0.5px solid rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.7);
+    padding: 7px 15px;
+    border-radius: 20px;
+    font-size: clamp(13px, 2.8vw, 15px);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    font-family: inherit;
+    min-width: 52px;
+    text-align: center;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .mood-btn:active {
+    background: rgba(255,255,255,0.25);
+    transform: scale(0.96);
+  }
+  .mood-btn.selected {
+    background: rgba(255,255,255,0.28);
+    border-color: rgba(255,255,255,0.45);
+    color: #fff;
+    box-shadow: 0 0 16px rgba(255,255,255,0.12);
+  }
+  .mood-em {
+    margin-right: 2px;
+  }
+  .diary-input {
+    width: 100%;
+    background: rgba(255,255,255,0.08);
+    border: 0.5px solid rgba(255,255,255,0.18);
+    border-radius: 14px;
+    padding: 10px 14px;
+    color: #fff;
+    font-size: 15px;
+    font-family: inherit;
+    resize: none;
+    outline: none;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: all 0.25s ease;
+    line-height: 1.5;
+    min-height: 48px;
+  }
+  .diary-input:focus {
+    background: rgba(255,255,255,0.14);
+    border-color: rgba(255,255,255,0.35);
+    box-shadow: 0 0 16px rgba(255,255,255,0.06);
+  }
+  .diary-input::placeholder {
+    color: rgba(255,255,255,0.3);
+  }
+  .diary-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+  }
+  .save-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    background: rgba(255,255,255,0.18);
+    border: 0.5px solid rgba(255,255,255,0.28);
+    color: #fff;
+    padding: 8px 22px;
+    border-radius: 20px;
+    font-size: clamp(13px, 2.8vw, 15px);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    font-family: inherit;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .save-btn:active {
+    background: rgba(255,255,255,0.32);
+    transform: scale(0.96);
+  }
+  .save-hint {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .save-hint.show {
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- 场景层 -->
+  <div class="scene">
+    <div class="sky"></div>
+    <div class="sun-glow"></div>
+    <div class="light-rays"></div>
+
+    <!-- 远山 -->
+    <div class="far-mountains">
+      <svg viewBox="0 0 420 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 200 L0 90 Q30 50 70 75 Q110 35 150 60 Q190 20 230 45 Q270 15 310 50 Q350 25 380 55 Q400 40 420 60 L420 200 Z" fill="rgba(46,125,50,0.4)"/>
+        <path d="M0 200 L0 100 Q50 55 100 85 Q150 45 200 70 Q250 35 300 65 Q350 30 380 60 Q400 45 420 65 L420 200 Z" fill="rgba(27,94,32,0.35)"/>
+        <path d="M0 200 L0 120 Q60 75 120 100 Q180 60 240 85 Q300 55 350 80 Q380 65 420 85 L420 200 Z" fill="rgba(13,59,15,0.3)"/>
+      </svg>
+    </div>
+
+    <div class="mist-layer"></div>
+    <div class="mist-layer-2"></div>
+
+    <!-- 中景山丘 -->
+    <div class="mid-hills">
+      <svg viewBox="0 0 420 150" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 150 L0 55 Q40 30 80 50 Q120 20 170 40 Q220 10 270 35 Q320 15 360 30 Q390 20 420 35 L420 150 Z" fill="#2e7d32" opacity="0.7"/>
+        <path d="M0 150 L0 70 Q50 40 100 60 Q160 35 210 55 Q260 30 310 50 Q360 30 420 50 L420 150 Z" fill="#1b5e20" opacity="0.75"/>
+      </svg>
+    </div>
+
+    <!-- 雨林树木 -->
+    <div class="trees-layer">
+      <svg viewBox="0 0 420 280" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- 地面 -->
+        <ellipse cx="210" cy="265" rx="230" ry="30" fill="#1b3a0a" opacity="0.9"/>
+        <ellipse cx="210" cy="270" rx="280" ry="35" fill="#0d2604"/>
+        <!-- 左侧大树 -->
+        <rect x="10" y="100" width="18" height="175" fill="#3e2723" rx="4"/>
+        <ellipse cx="19" cy="85" rx="55" ry="65" fill="#33691e" opacity="0.85"/>
+        <ellipse cx="-10" cy="100" rx="40" ry="50" fill="#2e7d32" opacity="0.75"/>
+        <ellipse cx="40" cy="90" rx="35" ry="55" fill="#388e3c" opacity="0.7"/>
+        <!-- 右侧大树 -->
+        <rect x="385" y="80" width="20" height="190" fill="#4e342e" rx="4"/>
+        <ellipse cx="395" cy="65" rx="60" ry="70" fill="#33691e" opacity="0.85"/>
+        <ellipse cx="420" cy="80" rx="45" ry="55" fill="#2e7d32" opacity="0.75"/>
+        <ellipse cx="370" cy="75" rx="38" ry="50" fill="#43a047" opacity="0.7"/>
+        <!-- 中左树 -->
+        <rect x="60" y="140" width="12" height="135" fill="#4e342e" rx="3"/>
+        <ellipse cx="66" cy="125" rx="38" ry="50" fill="#388e3c" opacity="0.8"/>
+        <ellipse cx="45" cy="135" rx="28" ry="38" fill="#2e7d32" opacity="0.7"/>
+        <!-- 中右树 -->
+        <rect x="340" y="130" width="14" height="145" fill="#5d4037" rx="3"/>
+        <ellipse cx="347" cy="115" rx="42" ry="55" fill="#43a047" opacity="0.8"/>
+        <ellipse cx="365" cy="125" rx="30" ry="40" fill="#2e7d32" opacity="0.7"/>
+        <!-- 灌木 -->
+        <ellipse cx="120" cy="230" rx="28" ry="38" fill="#388e3c" opacity="0.8"/>
+        <ellipse cx="105" cy="235" rx="18" ry="28" fill="#2e7d32" opacity="0.75"/>
+        <ellipse cx="300" cy="225" rx="32" ry="42" fill="#43a047" opacity="0.8"/>
+        <ellipse cx="285" cy="230" rx="20" ry="30" fill="#2e7d32" opacity="0.75"/>
+        <!-- 地面植被 -->
+        <ellipse cx="50" cy="260" rx="35" ry="18" fill="#33691e" opacity="0.6"/>
+        <ellipse cx="160" cy="258" rx="40" ry="15" fill="#43a047" opacity="0.5"/>
+        <ellipse cx="260" cy="260" rx="38" ry="16" fill="#388e3c" opacity="0.5"/>
+        <ellipse cx="370" cy="262" rx="32" ry="14" fill="#33691e" opacity="0.6"/>
+        <!-- 溪流 -->
+        <rect x="195" y="240" width="30" height="30" rx="15" fill="rgba(176,224,255,0.25)"/>
+        <ellipse cx="210" cy="265" rx="50" ry="10" fill="rgba(144,202,249,0.2)"/>
+      </svg>
+    </div>
+
+    <div class="mist-fg"></div>
+    <div class="rain-container" id="rainContainer"></div>
+
+    <div class="firefly" style="top:32%;left:15%;animation-delay:0s;animation-duration:5s"></div>
+    <div class="firefly" style="top:38%;left:72%;animation-delay:2s;animation-duration:6s"></div>
+    <div class="firefly" style="top:46%;left:44%;animation-delay:1s;animation-duration:7s"></div>
+    <div class="firefly" style="top:53%;left:18%;animation-delay:3s;animation-duration:5.5s"></div>
+    <div class="firefly" style="top:50%;left:82%;animation-delay:4s;animation-duration:6.5s"></div>
+  </div>
+
+  <!-- 日期天气 -->
+  <div class="top-bar">
+    <div class="date-block">
+      <div class="date-day">6/5</div>
+      <div class="date-info">2026年 · 星期五</div>
+      <div class="special-tag">🌍 世界环境日</div>
+    </div>
+    <div class="weather-block">
+      <div class="weather-icon">🌦️</div>
+      <div class="weather-temp">32°C</div>
+      <div class="weather-desc">零星小雨</div>
+    </div>
+  </div>
+
+  <!-- 名言 -->
+  <div class="quote-section">
+    <div class="quote-mark">&ldquo;</div>
+    <div class="quote-text">世界上最快乐的事，
+莫过于为理想而奋斗。</div>
+    <div class="quote-divider"></div>
+    <div class="quote-author">—— 苏格拉底</div>
+  </div>
+
+  <!-- 心情日记 -->
+  <div class="diary-section">
+    <div class="diary-title">📝 今日心情日记</div>
+    <div class="mood-selector" id="moodSelector">
+      <button class="mood-btn" data-mood="开心"><span class="mood-em">😊</span>开心</button>
+      <button class="mood-btn" data-mood="平静"><span class="mood-em">😌</span>平静</button>
+      <button class="mood-btn" data-mood="生气"><span class="mood-em">😡</span>生气</button>
+      <button class="mood-btn" data-mood="郁闷"><span class="mood-em">😞</span>郁闷</button>
+      <button class="mood-btn" data-mood="难过"><span class="mood-em">😢</span>难过</button>
+    </div>
+    <textarea class="diary-input" id="diaryText" rows="2" placeholder="记录今天的点滴…"></textarea>
+    <div class="diary-actions">
+      <span class="save-hint" id="saveHint">✓ 已保存</span>
+      <button class="save-btn" id="saveBtn">💾 保存心情</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var KEY = 'dq_2026-06-05';
+  var $ = document.getElementById.bind(document);
+  var moodBtns = document.querySelectorAll('#moodSelector .mood-btn');
+  var diaryEl = $('diaryText');
+  var saveBtn = $('saveBtn');
+  var saveHint = $('saveHint');
+  var selectedMood = null;
+  var typingTimer;
+
+  // 恢复已保存
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (raw) {
+      var d = JSON.parse(raw);
+      selectedMood = d.mood || null;
+      diaryEl.value = d.text || '';
+      if (d.mood) {
+        moodBtns.forEach(function(b) {
+          if (b.dataset.mood === d.mood) b.classList.add('selected');
+        });
+      }
+    }
+  } catch(_) {}
+
+  // 心情选择
+  moodBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      moodBtns.forEach(function(b) { b.classList.remove('selected'); });
+      btn.classList.add('selected');
+      selectedMood = btn.dataset.mood;
+      autoSave();
+    });
+  });
+
+  function saveData() {
+    var data = JSON.stringify({
+      date: '2026-06-05',
+      mood: selectedMood,
+      text: diaryEl.value,
+      savedAt: new Date().toISOString()
+    });
+    localStorage.setItem(KEY, data);
+  }
+
+  function autoSave() {
+    saveData();
+    saveHint.classList.add('show');
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(function() { saveHint.classList.remove('show'); }, 1800);
+  }
+
+  // 手动保存
+  saveBtn.addEventListener('click', autoSave);
+
+  // 输入自动保存
+  diaryEl.addEventListener('input', function() {
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(autoSave, 1200);
+  });
+
+  // 雨滴
+  var rc = $('rainContainer');
+  for (var i = 0; i < 40; i++) {
+    var drop = document.createElement('div');
+    drop.className = 'raindrop';
+    drop.style.left = Math.random() * 100 + '%';
+    drop.style.animationDuration = (0.5 + Math.random() * 1.3) + 's';
+    drop.style.animationDelay = Math.random() * 2.5 + 's';
+    rc.appendChild(drop);
+  }
+
+  // 移动端：点击空白收起键盘
+  document.querySelector('.scene').addEventListener('click', function(e) {
+    if (e.target === this || e.target.classList.contains('sky')) {
+      diaryEl.blur();
+    }
+  });
+})();
+</script>
+</body>
+</html>
